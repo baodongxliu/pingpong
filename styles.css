@@ -373,3 +373,7 @@ input:focus, select:focus {
 .summary-total span { font-size: 16px; }
 .summary-total span:first-child { color: var(--ink); font-weight: 600; }
 .summary-total span:last-child { color: var(--teal-dark); }
+
+.export-card { padding: 16px 20px; }
+.export-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.export-actions .btn { flex: 1; min-width: 140px; padding: 10px 12px; }

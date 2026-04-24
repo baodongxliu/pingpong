@@ -457,6 +457,84 @@ document.getElementById("usage-form").addEventListener("submit", async (e) => {
   }
 });
 
+/* ---------- Export ---------- */
+function getCurrentFilteredItems() {
+  const from = document.getElementById("f-from").value || null;
+  const to = document.getElementById("f-to").value || null;
+  const view = document.getElementById("f-child").value || "all";
+  return { items: filterHistory({ from, to, view }), from, to, view };
+}
+
+function csvEscape(s) {
+  if (s == null) return "";
+  const str = String(s);
+  return /[",\n\r]/.test(str) ? '"' + str.replace(/"/g, '""') + '"' : str;
+}
+
+function buildCsv(items) {
+  const header = ["Date", "Day", "Type", "Child", "Hours", "Notes"].join(",");
+  const rows = items.map((x) => {
+    const isPurchase = x.kind === "purchase";
+    const signedHours = (isPurchase ? 1 : -1) * (Number(x.hours) || 0);
+    return [
+      x.date,
+      dowFromISO(x.date),
+      isPurchase ? "Purchase" : "Usage",
+      isPurchase ? "" : (x.child || ""),
+      signedHours,
+      x.notes || "",
+    ].map(csvEscape).join(",");
+  });
+  return [header, ...rows].join("\r\n") + "\r\n";
+}
+
+function buildJson({ items, from, to, view }) {
+  return JSON.stringify({
+    exported: new Date().toISOString(),
+    filters: { from, to, view },
+    entries: items.map((x) => ({
+      date: x.date,
+      dayOfWeek: dowFromISO(x.date),
+      type: x.kind,
+      child: x.kind === "usage" ? (x.child || null) : null,
+      hours: Number(x.hours) || 0,
+      notes: x.notes || "",
+    })),
+  }, null, 2);
+}
+
+function downloadBlob(filename, content, mimeType) {
+  const blob = new Blob([content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => {
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 0);
+}
+
+document.getElementById("export-csv").addEventListener("click", () => {
+  const data = getCurrentFilteredItems();
+  if (!data.items.length) {
+    showToast("Nothing to export — adjust filters", true);
+    return;
+  }
+  downloadBlob(`pingpong-${todayISO()}.csv`, buildCsv(data.items), "text/csv;charset=utf-8");
+});
+
+document.getElementById("export-json").addEventListener("click", () => {
+  const data = getCurrentFilteredItems();
+  if (!data.items.length) {
+    showToast("Nothing to export — adjust filters", true);
+    return;
+  }
+  downloadBlob(`pingpong-${todayISO()}.json`, buildJson(data), "application/json");
+});
+
 /* ---------- Filter wiring ---------- */
 function applyDefaultFilters() {
   document.getElementById("f-from").value = monthsAgoISO(6);
