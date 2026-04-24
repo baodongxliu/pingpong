@@ -104,6 +104,7 @@ onAuthStateChanged(auth, (user) => {
     state.usages = [];
     renderDashboard();
     renderHistory();
+    renderLastEntries();
     showAuthScreen();
   }
 });
@@ -147,6 +148,7 @@ function subscribeAll() {
       state.purchases = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
       renderDashboard();
       renderHistory();
+      renderLastEntries();
     }, (err) => {
       console.error("purchases snapshot error", err);
       showToast("Failed to load purchases", true);
@@ -157,6 +159,7 @@ function subscribeAll() {
       state.usages = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
       renderDashboard();
       renderHistory();
+      renderLastEntries();
     }, (err) => {
       console.error("usages snapshot error", err);
       showToast("Failed to load usages", true);
@@ -309,35 +312,56 @@ function escapeHtml(s) {
     .replace(/'/g, "&#39;");
 }
 
-function renderConfirm(elId, { kind, date, hours, child, notes, newBalance }) {
+function mostRecent(items) {
+  if (!items.length) return null;
+  return [...items].sort((a, b) => {
+    if (a.date !== b.date) return a.date < b.date ? 1 : -1;
+    const ta = a.createdAt?.toMillis?.() ?? 0;
+    const tb = b.createdAt?.toMillis?.() ?? 0;
+    return tb - ta;
+  })[0];
+}
+
+function renderLastEntries() {
+  renderLastEntry("usage");
+  renderLastEntry("purchase");
+}
+
+function renderLastEntry(kind) {
+  const elId = kind === "usage" ? "usage-confirm" : "purchase-confirm";
   const el = document.getElementById(elId);
   if (!el) return;
+
+  const item = mostRecent(kind === "usage" ? state.usages : state.purchases);
+  if (!item) {
+    el.classList.add("hidden");
+    el.innerHTML = "";
+    return;
+  }
+
   const isPurchase = kind === "purchase";
-  const tagClass = isPurchase ? "purchase" : "usage-" + child;
-  const tagText = isPurchase ? "Purchase" : child === "son" ? "Son" : "Daughter";
-  const hoursText = (isPurchase ? "+" : "−") + fmtHours(hours) + "h";
+  const tagClass = isPurchase ? "purchase" : "usage-" + item.child;
+  const tagText = isPurchase ? "Purchase" : item.child === "son" ? "Son" : "Daughter";
+  const hoursText = (isPurchase ? "+" : "−") + fmtHours(item.hours) + "h";
   const hoursClass = isPurchase ? "positive" : "negative";
-  const headText = isPurchase ? "Purchase added" : "Lesson logged";
+  const headText = isPurchase ? "Last purchase" : "Last usage";
+  const balance = computeBalance().total;
 
   el.innerHTML = `
-    <div class="confirm-head">
-      <span class="confirm-check">✓</span>
-      <span>${headText}</span>
-    </div>
+    <div class="confirm-head"><span>${headText}</span></div>
     <div class="confirm-entry">
       <div class="hi-top">
-        <span class="hi-date"><span class="hi-dow">${dowFromISO(date)}</span>${date}</span>
+        <span class="hi-date"><span class="hi-dow">${dowFromISO(item.date)}</span>${item.date}</span>
         <span class="hi-tag ${tagClass}">${tagText}</span>
       </div>
       <div class="hi-hours ${hoursClass}">${hoursText}</div>
-      ${notes ? `<div class="hi-notes">${escapeHtml(notes)}</div>` : ""}
+      ${item.notes ? `<div class="hi-notes">${escapeHtml(item.notes)}</div>` : ""}
     </div>
     <div class="confirm-balance">
-      <strong>${fmtHours(newBalance)}</strong> hours remaining
+      <strong>${fmtHours(balance)}</strong> hours remaining
     </div>
   `;
   el.classList.remove("hidden");
-  el.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
 /* ---------- Tab switching ---------- */
@@ -377,14 +401,13 @@ document.getElementById("purchase-form").addEventListener("submit", async (e) =>
     showToast("Enter a valid date and hours", true);
     return;
   }
-  const newBalance = computeBalance().total + hours;
   try {
     await addPurchase({ date, hours, notes });
-    renderConfirm("purchase-confirm", { kind: "purchase", date, hours, notes, newBalance });
     e.target.reset();
     document.getElementById("p-date").value = todayISO();
     document.getElementById("p-hours").value = 10;
     updateDateHint("p-date", "p-date-dow");
+    document.getElementById("purchase-confirm").scrollIntoView({ behavior: "smooth", block: "nearest" });
   } catch (err) {
     console.error(err);
     showToast("Could not save purchase", true);
@@ -394,23 +417,20 @@ document.getElementById("purchase-form").addEventListener("submit", async (e) =>
 document.getElementById("usage-form").addEventListener("submit", async (e) => {
   e.preventDefault();
   const date = document.getElementById("u-date").value;
-  const hours = parseFloat(document.getElementById("u-hours").value);
+  const hoursInput = document.querySelector('input[name="u-hours"]:checked');
+  const hours = hoursInput ? parseFloat(hoursInput.value) : NaN;
   const notes = document.getElementById("u-notes").value.trim();
   const childInput = document.querySelector('input[name="child"]:checked');
   if (!date || !(hours > 0) || !childInput) {
     showToast("Fill date, child, and hours", true);
     return;
   }
-  const newBalance = computeBalance().total - hours;
   try {
     await addUsage({ date, hours, child: childInput.value, notes });
-    renderConfirm("usage-confirm", {
-      kind: "usage", date, hours, child: childInput.value, notes, newBalance,
-    });
     e.target.reset();
     document.getElementById("u-date").value = todayISO();
-    document.getElementById("u-hours").value = 1;
     updateDateHint("u-date", "u-date-dow");
+    document.getElementById("usage-confirm").scrollIntoView({ behavior: "smooth", block: "nearest" });
   } catch (err) {
     console.error(err);
     showToast("Could not save usage", true);

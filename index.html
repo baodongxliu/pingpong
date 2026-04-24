@@ -82,8 +82,25 @@
               <span>Daughter</span>
             </label>
           </div>
-          <label for="u-hours">Hours</label>
-          <input id="u-hours" type="number" step="0.5" min="0.5" value="1" required />
+          <label>Hours</label>
+          <div class="pill-group" role="radiogroup">
+            <label class="pill">
+              <input type="radio" name="u-hours" value="0.5" required />
+              <span>0.5</span>
+            </label>
+            <label class="pill">
+              <input type="radio" name="u-hours" value="1" required checked />
+              <span>1</span>
+            </label>
+            <label class="pill">
+              <input type="radio" name="u-hours" value="1.5" required />
+              <span>1.5</span>
+            </label>
+            <label class="pill">
+              <input type="radio" name="u-hours" value="2" required />
+              <span>2</span>
+            </label>
+          </div>
           <label for="u-notes">Notes (optional)</label>
           <input id="u-notes" type="text" placeholder="e.g. Coach A, forehand drills" />
           <button type="submit" class="btn btn-primary">Log usage (−hours)</button>
