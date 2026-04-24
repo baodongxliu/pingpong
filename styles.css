@@ -359,3 +359,17 @@ input:focus, select:focus {
   color: var(--ink);
   margin-right: 4px;
 }
+
+/* ---------- Summary card ---------- */
+.summary-card { padding: 16px 20px; }
+.summary-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 0;
+  font-size: 15px;
+}
+.summary-row + .summary-row { border-top: 1px solid var(--border); }
+.summary-row span:first-child { color: var(--muted); }
+.summary-row span:last-child { font-weight: 600; }
+.summary-total span { font-size: 16px; }
+.summary-total span:first-child { color: var(--ink); font-weight: 600; }
+.summary-total span:last-child { color: var(--teal-dark); }

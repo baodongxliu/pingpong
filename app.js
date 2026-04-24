@@ -49,6 +49,12 @@ function todayISO() {
   return new Date().toLocaleDateString("en-CA");
 }
 
+function monthsAgoISO(n) {
+  const d = new Date();
+  d.setMonth(d.getMonth() - n);
+  return d.toLocaleDateString("en-CA");
+}
+
 function dowFromISO(iso) {
   if (!iso) return "";
   const [y, m, d] = iso.split("-").map(Number);
@@ -211,24 +217,23 @@ function computeBalance() {
   };
 }
 
-function filterHistory({ from, to, child }) {
-  const purchases = state.purchases.map((p) => ({
-    ...p, kind: "purchase", sortDate: p.date,
-  }));
-  const usages = state.usages
-    .filter((u) => child === "all" || !child || u.child === child)
-    .map((u) => ({ ...u, kind: "usage", sortDate: u.date }));
+function filterHistory({ from, to, view }) {
+  const purchases = state.purchases.map((p) => ({ ...p, kind: "purchase" }));
+  const usages = state.usages.map((u) => ({ ...u, kind: "usage" }));
 
-  // When a child filter is active, exclude purchases (they aren't attributed to a child).
-  const combined = child && child !== "all"
-    ? usages
-    : [...purchases, ...usages];
+  let combined;
+  if (view === "purchase") {
+    combined = purchases;
+  } else if (view === "son" || view === "daughter") {
+    combined = usages.filter((u) => u.child === view);
+  } else {
+    combined = [...purchases, ...usages];
+  }
 
   return combined
     .filter((x) => (!from || x.date >= from) && (!to || x.date <= to))
     .sort((a, b) => {
       if (a.date !== b.date) return a.date < b.date ? 1 : -1;
-      // Tiebreak by createdAt when available
       const ta = a.createdAt?.toMillis?.() ?? 0;
       const tb = b.createdAt?.toMillis?.() ?? 0;
       return tb - ta;
@@ -251,8 +256,9 @@ function renderDashboard() {
 function renderHistory() {
   const from = document.getElementById("f-from").value || null;
   const to = document.getElementById("f-to").value || null;
-  const child = document.getElementById("f-child").value || "all";
-  const items = filterHistory({ from, to, child });
+  const view = document.getElementById("f-child").value || "all";
+  const items = filterHistory({ from, to, view });
+  renderSummary(items);
 
   const list = document.getElementById("history-list");
   const emptyEl = document.getElementById("history-empty");
@@ -310,6 +316,20 @@ function escapeHtml(s) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
+}
+
+function renderSummary(items) {
+  let purchases = 0, son = 0, daughter = 0;
+  for (const x of items) {
+    if (x.kind === "purchase") purchases += Number(x.hours) || 0;
+    else if (x.child === "son") son += Number(x.hours) || 0;
+    else if (x.child === "daughter") daughter += Number(x.hours) || 0;
+  }
+  const total = son + daughter;
+  document.getElementById("sum-purchases").textContent = fmtHours(purchases) + "h";
+  document.getElementById("sum-son").textContent = fmtHours(son) + "h";
+  document.getElementById("sum-daughter").textContent = fmtHours(daughter) + "h";
+  document.getElementById("sum-total").textContent = fmtHours(total) + "h";
 }
 
 function mostRecent(items) {
@@ -438,6 +458,17 @@ document.getElementById("usage-form").addEventListener("submit", async (e) => {
 });
 
 /* ---------- Filter wiring ---------- */
+function applyDefaultFilters() {
+  document.getElementById("f-from").value = monthsAgoISO(6);
+  document.getElementById("f-to").value = "";
+  document.getElementById("f-child").value = "all";
+  updateDateHint("f-from", "f-from-dow");
+  updateDateHint("f-to", "f-to-dow");
+}
+
+// Initial: show last 6 months by default.
+applyDefaultFilters();
+
 ["f-from", "f-to", "f-child"].forEach((id) => {
   document.getElementById(id).addEventListener("change", renderHistory);
 });
@@ -450,10 +481,6 @@ document.getElementById("f-today").addEventListener("click", () => {
   renderHistory();
 });
 document.getElementById("f-clear").addEventListener("click", () => {
-  document.getElementById("f-from").value = "";
-  document.getElementById("f-to").value = "";
-  document.getElementById("f-child").value = "all";
-  updateDateHint("f-from", "f-from-dow");
-  updateDateHint("f-to", "f-to-dow");
+  applyDefaultFilters();
   renderHistory();
 });

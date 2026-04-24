@@ -142,19 +142,29 @@
         </div>
         <div class="filter-row">
           <div class="filter-col">
-            <label for="f-child">Child</label>
+            <label for="f-child">Show</label>
             <select id="f-child">
               <option value="all">All</option>
+              <option value="purchase">Purchases</option>
               <option value="son">Son</option>
               <option value="daughter">Daughter</option>
             </select>
           </div>
           <div class="filter-col filter-actions">
             <button id="f-today" type="button" class="btn btn-ghost">Today only</button>
-            <button id="f-clear" type="button" class="btn btn-ghost">Clear</button>
+            <button id="f-clear" type="button" class="btn btn-ghost">Reset</button>
           </div>
         </div>
       </div>
+
+      <div class="card summary-card">
+        <h2>Summary</h2>
+        <div class="summary-row"><span>Purchases</span><span id="sum-purchases">0h</span></div>
+        <div class="summary-row"><span>Son used</span><span id="sum-son">0h</span></div>
+        <div class="summary-row"><span>Daughter used</span><span id="sum-daughter">0h</span></div>
+        <div class="summary-row summary-total"><span>Total used</span><span id="sum-total">0h</span></div>
+      </div>
+
       <ul id="history-list" class="history-list"></ul>
       <p id="history-empty" class="history-empty hidden">No entries match these filters.</p>
     </section>
