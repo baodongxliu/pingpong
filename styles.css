@@ -296,3 +296,18 @@ input:focus, select:focus {
 }
 
 .error { color: var(--danger); font-size: 14px; margin-top: 12px; min-height: 20px; }
+
+.date-dow {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  min-height: 16px;
+}
+
+.hi-dow {
+  color: var(--muted);
+  font-weight: 700;
+  margin-right: 6px;
+}

@@ -49,6 +49,20 @@ function todayISO() {
   return new Date().toLocaleDateString("en-CA");
 }
 
+function dowFromISO(iso) {
+  if (!iso) return "";
+  const [y, m, d] = iso.split("-").map(Number);
+  if (!y || !m || !d) return "";
+  return new Date(y, m - 1, d).toLocaleDateString("en-US", { weekday: "short" });
+}
+
+function updateDateHint(inputId, hintId) {
+  const hint = document.getElementById(hintId);
+  if (!hint) return;
+  const v = document.getElementById(inputId).value;
+  hint.textContent = dowFromISO(v);
+}
+
 function showToast(msg, isError = false) {
   const t = document.getElementById("toast");
   t.textContent = msg;
@@ -261,7 +275,7 @@ function renderHistory() {
 
     li.innerHTML = `
       <div class="hi-top">
-        <span class="hi-date">${item.date}</span>
+        <span class="hi-date"><span class="hi-dow">${dowFromISO(item.date)}</span>${item.date}</span>
         <span class="hi-tag ${tagClass}">${tagText}</span>
       </div>
       <div class="hi-hours ${hoursClass}">${hoursText}</div>
@@ -311,6 +325,18 @@ document.querySelectorAll(".tab").forEach((btn) => {
 document.getElementById("p-date").value = todayISO();
 document.getElementById("u-date").value = todayISO();
 
+// Day-of-week hints under each date input
+const dateHints = [
+  ["p-date", "p-date-dow"],
+  ["u-date", "u-date-dow"],
+  ["f-from", "f-from-dow"],
+  ["f-to", "f-to-dow"],
+];
+dateHints.forEach(([inputId, hintId]) => {
+  document.getElementById(inputId).addEventListener("change", () => updateDateHint(inputId, hintId));
+  updateDateHint(inputId, hintId);
+});
+
 document.getElementById("purchase-form").addEventListener("submit", async (e) => {
   e.preventDefault();
   const date = document.getElementById("p-date").value;
@@ -326,6 +352,7 @@ document.getElementById("purchase-form").addEventListener("submit", async (e) =>
     e.target.reset();
     document.getElementById("p-date").value = todayISO();
     document.getElementById("p-hours").value = 10;
+    updateDateHint("p-date", "p-date-dow");
   } catch (err) {
     console.error(err);
     showToast("Could not save purchase", true);
@@ -348,6 +375,7 @@ document.getElementById("usage-form").addEventListener("submit", async (e) => {
     e.target.reset();
     document.getElementById("u-date").value = todayISO();
     document.getElementById("u-hours").value = 1;
+    updateDateHint("u-date", "u-date-dow");
   } catch (err) {
     console.error(err);
     showToast("Could not save usage", true);
@@ -362,11 +390,15 @@ document.getElementById("f-today").addEventListener("click", () => {
   const t = todayISO();
   document.getElementById("f-from").value = t;
   document.getElementById("f-to").value = t;
+  updateDateHint("f-from", "f-from-dow");
+  updateDateHint("f-to", "f-to-dow");
   renderHistory();
 });
 document.getElementById("f-clear").addEventListener("click", () => {
   document.getElementById("f-from").value = "";
   document.getElementById("f-to").value = "";
   document.getElementById("f-child").value = "all";
+  updateDateHint("f-from", "f-from-dow");
+  updateDateHint("f-to", "f-to-dow");
   renderHistory();
 });
