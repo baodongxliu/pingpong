@@ -16,11 +16,11 @@
     <div class="auth-card">
       <h1 class="app-title">🏓 Pingpong Lessons</h1>
       <p class="auth-sub">Sign in to track lesson hours.</p>
-      <form id="signin-form">
+      <form id="signin-form" autocomplete="on" action="#">
         <label for="email">Email</label>
-        <input id="email" type="email" autocomplete="email" required />
+        <input id="email" name="email" type="email" autocomplete="username" required />
         <label for="password">Password</label>
-        <input id="password" type="password" autocomplete="current-password" required />
+        <input id="password" name="password" type="password" autocomplete="current-password" required />
         <button type="submit" class="btn btn-primary">Sign in</button>
         <p id="signin-error" class="error"></p>
       </form>
