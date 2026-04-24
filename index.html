@@ -85,6 +85,10 @@
           <label>Hours</label>
           <div class="pill-group" role="radiogroup">
             <label class="pill">
+              <input type="radio" name="u-hours" value="0" required />
+              <span>0</span>
+            </label>
+            <label class="pill">
               <input type="radio" name="u-hours" value="0.5" required />
               <span>0.5</span>
             </label>
@@ -101,6 +105,7 @@
               <span>2</span>
             </label>
           </div>
+          <small class="hint">Use 0 for absences (sickness, competition, out of town) — add a reason in Notes.</small>
           <label for="u-notes">Notes (optional)</label>
           <input id="u-notes" type="text" placeholder="e.g. Coach A, forehand drills" />
           <button type="submit" class="btn btn-primary">Log usage (−hours)</button>

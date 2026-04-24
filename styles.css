@@ -273,6 +273,15 @@ input:focus, select:focus {
 }
 .hi-hours.positive { color: var(--success); }
 .hi-hours.negative { color: var(--danger); }
+.hi-hours.zero { color: var(--muted); }
+
+.hint {
+  display: block;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.4;
+}
 .history-empty { text-align: center; color: var(--muted); padding: 24px; }
 
 /* ---------- Toast ---------- */

@@ -277,10 +277,11 @@ function renderHistory() {
     li.dataset.kind = item.kind;
 
     const isPurchase = item.kind === "purchase";
+    const isZero = Number(item.hours) === 0;
     const tagClass = isPurchase ? "purchase" : "usage-" + item.child;
     const tagText = isPurchase ? "Purchase" : item.child === "son" ? "Son" : "Daughter";
-    const hoursText = (isPurchase ? "+" : "−") + fmtHours(item.hours) + "h";
-    const hoursClass = isPurchase ? "positive" : "negative";
+    const hoursText = isZero ? "0h" : (isPurchase ? "+" : "−") + fmtHours(item.hours) + "h";
+    const hoursClass = isZero ? "zero" : isPurchase ? "positive" : "negative";
 
     li.innerHTML = `
       <div class="hi-top">
@@ -360,10 +361,11 @@ function renderLastEntry(kind) {
   }
 
   const isPurchase = kind === "purchase";
+  const isZero = Number(item.hours) === 0;
   const tagClass = isPurchase ? "purchase" : "usage-" + item.child;
   const tagText = isPurchase ? "Purchase" : item.child === "son" ? "Son" : "Daughter";
-  const hoursText = (isPurchase ? "+" : "−") + fmtHours(item.hours) + "h";
-  const hoursClass = isPurchase ? "positive" : "negative";
+  const hoursText = isZero ? "0h" : (isPurchase ? "+" : "−") + fmtHours(item.hours) + "h";
+  const hoursClass = isZero ? "zero" : isPurchase ? "positive" : "negative";
   const headText = isPurchase ? "Last purchase" : "Last usage";
   const balance = computeBalance().total;
 
@@ -441,7 +443,7 @@ document.getElementById("usage-form").addEventListener("submit", async (e) => {
   const hours = hoursInput ? parseFloat(hoursInput.value) : NaN;
   const notes = document.getElementById("u-notes").value.trim();
   const childInput = document.querySelector('input[name="child"]:checked');
-  if (!date || !(hours > 0) || !childInput) {
+  if (!date || !hoursInput || Number.isNaN(hours) || hours < 0 || !childInput) {
     showToast("Fill date, child, and hours", true);
     return;
   }
