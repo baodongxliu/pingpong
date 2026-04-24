@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f766e" />
+  <title>Pingpong Lessons</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <!-- Loading splash while Firebase SDKs boot -->
+  <div id="loading" class="loading">Loading…</div>
+
+  <!-- Auth screen (shown when signed out) -->
+  <section id="auth-screen" class="auth-screen hidden">
+    <div class="auth-card">
+      <h1 class="app-title">🏓 Pingpong Lessons</h1>
+      <p class="auth-sub">Sign in to track lesson hours.</p>
+      <form id="signin-form">
+        <label for="email">Email</label>
+        <input id="email" type="email" autocomplete="email" required />
+        <label for="password">Password</label>
+        <input id="password" type="password" autocomplete="current-password" required />
+        <button type="submit" class="btn btn-primary">Sign in</button>
+        <p id="signin-error" class="error"></p>
+      </form>
+    </div>
+  </section>
+
+  <!-- Main app (shown when signed in) -->
+  <main id="app" class="app hidden">
+    <header class="app-header">
+      <h1 class="app-title">🏓 Pingpong</h1>
+      <button id="signout-btn" class="btn btn-ghost" title="Sign out">Sign out</button>
+    </header>
+
+    <nav class="tabs" role="tablist">
+      <button class="tab active" data-tab="dashboard" role="tab">Dashboard</button>
+      <button class="tab" data-tab="log" role="tab">Log</button>
+      <button class="tab" data-tab="history" role="tab">History</button>
+    </nav>
+
+    <!-- Dashboard -->
+    <section id="tab-dashboard" class="tab-panel active">
+      <div class="balance-card">
+        <div class="balance-label">Hours remaining</div>
+        <div id="balance-number" class="balance-number">—</div>
+        <div id="balance-sub" class="balance-sub">&nbsp;</div>
+      </div>
+      <div class="breakdown">
+        <div class="breakdown-row">
+          <span class="breakdown-key">Purchased</span>
+          <span id="bd-purchased" class="breakdown-val">0</span>
+        </div>
+        <div class="breakdown-row">
+          <span class="breakdown-key">Son used</span>
+          <span id="bd-son" class="breakdown-val">0</span>
+        </div>
+        <div class="breakdown-row">
+          <span class="breakdown-key">Daughter used</span>
+          <span id="bd-daughter" class="breakdown-val">0</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Log: two forms stacked -->
+    <section id="tab-log" class="tab-panel">
+      <div class="card">
+        <h2>Log a purchase</h2>
+        <form id="purchase-form">
+          <label for="p-date">Date</label>
+          <input id="p-date" type="date" required />
+          <label for="p-hours">Hours</label>
+          <input id="p-hours" type="number" step="0.5" min="0.5" value="10" required />
+          <label for="p-notes">Notes (optional)</label>
+          <input id="p-notes" type="text" placeholder="e.g. receipt #12345" />
+          <button type="submit" class="btn btn-primary">Add purchase (+hours)</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>Log a lesson used</h2>
+        <form id="usage-form">
+          <label for="u-date">Date</label>
+          <input id="u-date" type="date" required />
+          <label>Child</label>
+          <div class="pill-group" role="radiogroup">
+            <label class="pill">
+              <input type="radio" name="child" value="son" required />
+              <span>Son</span>
+            </label>
+            <label class="pill">
+              <input type="radio" name="child" value="daughter" required />
+              <span>Daughter</span>
+            </label>
+          </div>
+          <label for="u-hours">Hours</label>
+          <input id="u-hours" type="number" step="0.5" min="0.5" value="1" required />
+          <label for="u-notes">Notes (optional)</label>
+          <input id="u-notes" type="text" placeholder="e.g. Coach A, forehand drills" />
+          <button type="submit" class="btn btn-primary">Log usage (−hours)</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- History -->
+    <section id="tab-history" class="tab-panel">
+      <div class="card filter-card">
+        <h2>Filters</h2>
+        <div class="filter-row">
+          <div class="filter-col">
+            <label for="f-from">From</label>
+            <input id="f-from" type="date" />
+          </div>
+          <div class="filter-col">
+            <label for="f-to">To</label>
+            <input id="f-to" type="date" />
+          </div>
+        </div>
+        <div class="filter-row">
+          <div class="filter-col">
+            <label for="f-child">Child</label>
+            <select id="f-child">
+              <option value="all">All</option>
+              <option value="son">Son</option>
+              <option value="daughter">Daughter</option>
+            </select>
+          </div>
+          <div class="filter-col filter-actions">
+            <button id="f-today" type="button" class="btn btn-ghost">Today only</button>
+            <button id="f-clear" type="button" class="btn btn-ghost">Clear</button>
+          </div>
+        </div>
+      </div>
+      <ul id="history-list" class="history-list"></ul>
+      <p id="history-empty" class="history-empty hidden">No entries match these filters.</p>
+    </section>
+  </main>
+
+  <!-- Toast -->
+  <div id="toast" class="toast hidden"></div>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
