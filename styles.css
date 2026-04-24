@@ -311,3 +311,51 @@ input:focus, select:focus {
   font-weight: 700;
   margin-right: 6px;
 }
+
+/* ---------- Post-submit confirmation ---------- */
+.confirm-card {
+  margin-top: 16px;
+  padding: 14px;
+  background: var(--success-soft);
+  border: 1px solid #86efac;
+  border-radius: var(--radius);
+  animation: toastIn 0.25s ease-out;
+}
+.confirm-head {
+  display: flex; align-items: center; gap: 8px;
+  font-weight: 600;
+  color: #166534;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+.confirm-check {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 20px; height: 20px;
+  background: var(--success);
+  color: white;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 700;
+}
+.confirm-entry {
+  background: white;
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 16px;
+  align-items: center;
+}
+.confirm-entry .hi-notes { grid-column: 1 / -1; margin-top: 4px; }
+.confirm-balance {
+  margin-top: 10px;
+  padding: 0 4px;
+  font-size: 14px;
+  color: var(--ink);
+}
+.confirm-balance strong {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-right: 4px;
+}
